@@ -1,0 +1,2518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chord Practice</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 40px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 40px;
+      font-size: 2.5em;
+    }
+
+    .piano-section {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 0px;
+      position: relative;
+    }
+
+    .piano-container {
+      position: relative;
+      height: 280px;
+      width: fit-content;
+    }
+
+    .config-button {
+      width: 50px;
+      height: 50px;
+      background: white;
+      border: 2px solid #667eea;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: #667eea;
+      transition: all 0.3s;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      flex-shrink: 0;
+    }
+
+    .config-button:hover {
+      background: #667eea;
+      color: white;
+      transform: rotate(90deg);
+    }
+
+    .config-button.active {
+      background: #667eea;
+      color: white;
+      transform: rotate(90deg);
+    }
+
+    .config-wrapper {
+      position: relative;
+    }
+
+    .config-panel {
+      position: absolute;
+      left: 70px;
+      top: 0;
+      width: 300px;
+      background: white;
+      border: 2px solid #667eea;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      display: none;
+      z-index: 100;
+    }
+
+    .config-panel.visible {
+      display: block;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .config-panel h3 {
+      color: #667eea;
+      margin-bottom: 15px;
+      font-size: 1.2em;
+      border-bottom: 2px solid #667eea;
+      padding-bottom: 10px;
+    }
+
+    .chord-groups {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .chord-group-btn {
+      padding: 12px 20px;
+      background: white;
+      border: 2px solid #667eea;
+      border-radius: 8px;
+      color: #667eea;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 14px;
+    }
+
+    .chord-group-btn:hover {
+      background: #f0f0ff;
+      transform: translateX(5px);
+    }
+
+    .chord-group-btn.active {
+      background: #a8b8f5;
+      color: white;
+      border-color: #a8b8f5;
+    }
+
+    .keys-wrapper {
+      position: relative;
+      display: flex;
+    }
+
+    .white-key {
+      width: 60px;
+      height: 200px;
+      background: white;
+      border: 2px solid #333;
+      border-radius: 0 0 8px 8px;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      padding-bottom: 15px;
+    }
+
+    .white-key:hover {
+      background: #f0f0f0;
+      transform: translateY(-2px);
+    }
+
+    .white-key.selected {
+      background: #e8f4ff;
+    }
+
+    .white-key .note-name {
+      font-size: 14px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 5px;
+    }
+
+    .white-key .indicator {
+      width: 30px;
+      height: 4px;
+      background: #2196F3;
+      border-radius: 2px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .white-key.selected .indicator {
+      opacity: 1;
+    }
+
+    .black-keys {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 120px;
+      pointer-events: none;
+    }
+
+    .black-key {
+      width: 40px;
+      height: 120px;
+      background: #222;
+      border: 2px solid #000;
+      border-radius: 0 0 6px 6px;
+      cursor: pointer;
+      position: absolute;
+      transition: all 0.2s;
+      pointer-events: auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      padding-bottom: 10px;
+    }
+
+    .black-key:hover {
+      background: #444;
+      transform: translateY(-2px);
+    }
+
+    .black-key.selected {
+      background: #1a4d7a;
+    }
+
+    .black-key .note-name {
+      font-size: 10px;
+      font-weight: bold;
+      color: white;
+      margin-bottom: 5px;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    .black-key .indicator {
+      width: 20px;
+      height: 3px;
+      background: #2196F3;
+      border-radius: 2px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .black-key.selected .indicator {
+      opacity: 1;
+    }
+
+    .chord-menu {
+      position: absolute;
+      background: white;
+      border: 2px solid #667eea;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+      display: none;
+      z-index: 1000;
+      overflow: hidden;
+    }
+
+    .chord-menu.visible {
+      display: flex;
+      animation: menuSlideIn 0.15s ease;
+    }
+
+    @keyframes menuSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-5px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .chord-option {
+      padding: 8px 12px;
+      cursor: pointer;
+      background: white;
+      border: none;
+      font-size: 13px;
+      font-weight: bold;
+      color: #667eea;
+      transition: all 0.2s;
+      border-right: 1px solid #e0e0e0;
+      min-width: 38px;
+      text-align: center;
+    }
+
+    .chord-option:last-child {
+      border-right: none;
+    }
+
+    .chord-option:hover {
+      background: #667eea;
+      color: white;
+    }
+
+    .selected-notes {
+      margin-top: 5px;
+    }
+
+    .selected-notes h2 {
+      color: #555;
+      margin-bottom: 20px;
+      font-size: 1.5em;
+    }
+
+    .notes-display {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      min-height: 60px;
+      padding: 20px;
+      background: #f9f9f9;
+      border-radius: 12px;
+      border: 2px dashed #ddd;
+    }
+
+    .note-box {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 15px 25px;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      animation: slideIn 0.3s ease;
+      transition: all 0.3s;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .note-box:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+    }
+
+    .note-box .remove-icon {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: #ff4444;
+      color: white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .note-box:hover .remove-icon {
+      opacity: 1;
+    }
+
+    .note-box.playing {
+      background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+      transform: scale(1.1);
+      box-shadow: 0 6px 20px rgba(33, 150, 243, 0.5);
+    }
+
+    .empty-message {
+      color: #999;
+      font-style: italic;
+      text-align: center;
+      width: 100%;
+      padding: 20px;
+    }
+
+    .controls {
+      margin-top: 30px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .control-btn {
+      background: white;
+      border: 2px solid #667eea;
+      color: #667eea;
+      font-size: 24px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .control-btn:hover {
+      background: #667eea;
+      color: white;
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .control-btn:active {
+      transform: translateY(-1px);
+    }
+
+    .playback-controls {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .play-btn {
+      background: white;
+      border: 2px solid #4CAF50;
+      color: #4CAF50;
+      font-size: 28px;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .play-btn:hover {
+      background: #4CAF50;
+      color: white;
+      transform: scale(1.05);
+      box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+    }
+
+    .play-btn.playing {
+      background: #4CAF50;
+      color: white;
+    }
+
+    .metronome-controls {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      background: white;
+      padding: 10px 20px;
+      border-radius: 50px;
+      border: 2px solid #FF9800;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .metro-btn {
+      background: #FF9800;
+      color: white;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: bold;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .metro-btn:hover {
+      background: #F57C00;
+      transform: scale(1.1);
+    }
+
+    .metro-btn:active {
+      transform: scale(0.95);
+    }
+
+    .bpm-display {
+      font-size: 24px;
+      font-weight: bold;
+      color: #FF9800;
+      min-width: 80px;
+      text-align: center;
+    }
+
+    .chord-notes-section {
+      margin-top: 40px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .chord-notes-tabs {
+      display: flex;
+      background: #f5f5f5;
+      border-bottom: 2px solid #667eea;
+      padding: 0;
+      margin: 0;
+    }
+
+    .chord-notes-tab {
+      flex: 1;
+      padding: 15px 20px;
+      background: transparent;
+      border: none;
+      border-right: 1px solid #ddd;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      color: #666;
+      transition: all 0.3s;
+      position: relative;
+    }
+
+    .chord-notes-tab:last-child {
+      border-right: none;
+    }
+
+    .chord-notes-tab:hover {
+      background: #e8e8e8;
+      color: #667eea;
+    }
+
+    .chord-notes-tab.active {
+      background: white;
+      color: #667eea;
+    }
+
+    .chord-notes-tab.active::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: #667eea;
+    }
+
+    .chord-notes-content {
+      padding: 30px;
+      display: none;
+    }
+
+    .chord-notes-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .chord-notes-piano-container {
+      position: relative;
+      height: 280px;
+      width: fit-content;
+      margin: 0 auto;
+    }
+
+    .chord-notes-piano-container .white-key {
+      width: 50px;
+      height: 200px;
+    }
+
+    .chord-notes-piano-container .black-key {
+      width: 35px;
+      height: 120px;
+    }
+
+    .white-key.chord-root {
+      background: #4CAF50 !important;
+      border-color: #2E7D32 !important;
+    }
+
+    .white-key.chord-third {
+      background: #2196F3 !important;
+      border-color: #1565C0 !important;
+    }
+
+    .white-key.chord-fifth {
+      background: #FF9800 !important;
+      border-color: #E65100 !important;
+    }
+
+    .black-key.chord-root {
+      background: #2E7D32 !important;
+      border-color: #1B5E20 !important;
+    }
+
+    .black-key.chord-third {
+      background: #1565C0 !important;
+      border-color: #0D47A1 !important;
+    }
+
+    .black-key.chord-fifth {
+      background: #E65100 !important;
+      border-color: #BF360C !important;
+    }
+
+    .chord-notes-label {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 14px;
+      color: #666;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .chord-notes-label-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .chord-notes-label-color {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      border: 2px solid #333;
+    }
+
+    .chord-notes-label-color.root {
+      background: #4CAF50;
+      border-color: #2E7D32;
+    }
+
+    .chord-notes-label-color.third {
+      background: #2196F3;
+      border-color: #1565C0;
+    }
+
+    .chord-notes-label-color.fifth {
+      background: #FF9800;
+      border-color: #E65100;
+    }
+
+    .chord-notes-label-color.seventh {
+      background: #9C27B0;
+      border-color: #6A1B9A;
+    }
+
+    .chord-notes-label-color.ninth {
+      background: #E91E63;
+      border-color: #AD1457;
+    }
+
+    .chord-notes-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .chord-note-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 15px;
+      background: white;
+      border: 2px solid #ddd;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 14px;
+      font-weight: bold;
+      color: #666;
+    }
+
+    .chord-note-toggle:hover {
+      border-color: #667eea;
+      background: #f0f0ff;
+    }
+
+    .chord-note-toggle.active {
+      background: #667eea;
+      border-color: #667eea;
+      color: white;
+    }
+
+    .chord-note-toggle.disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      background: #f5f5f5;
+    }
+
+    .white-key.chord-seventh {
+      background: #9C27B0 !important;
+      border-color: #6A1B9A !important;
+    }
+
+    .white-key.chord-ninth {
+      background: #E91E63 !important;
+      border-color: #AD1457 !important;
+    }
+
+    .black-key.chord-seventh {
+      background: #6A1B9A !important;
+      border-color: #4A148C !important;
+    }
+
+    .black-key.chord-ninth {
+      background: #AD1457 !important;
+      border-color: #880E4F !important;
+    }
+
+    /* Violin styles - Vertical fretboard */
+    .violin-fretboard {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 0;
+      padding: 20px;
+      background: #f9f9f9;
+      border-radius: 12px;
+      border: 2px solid #ddd;
+      max-width: 800px;
+      margin: 0 auto;
+      justify-content: center;
+    }
+
+    .violin-string-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      min-width: 80px;
+      border-right: 2px solid #8B4513;
+      padding: 0 10px;
+    }
+
+    .violin-string-column:last-child {
+      border-right: none;
+    }
+
+    .violin-string-name {
+      height: 40px;
+      font-weight: bold;
+      font-size: 24px;
+      color: #333;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 5px;
+      width: 100%;
+      background: #fff;
+      border-radius: 8px;
+      border: 2px solid #8B4513;
+    }
+
+    .violin-frets-container {
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      width: 100%;
+    }
+
+    .violin-fret {
+      height: 50px;
+      border-bottom: none;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Finger position backgrounds */
+    .violin-fret[data-fret="0"] {
+      background: #ffffff; /* Open string - White */
+      border-bottom: 4px solid #8B4513; /* Thick horizontal line after open string */
+    }
+
+    .violin-fret[data-fret="1"],
+    .violin-fret[data-fret="2"] {
+      background: #ffffff; /* Finger 1 - White */
+    }
+
+    .violin-fret[data-fret="3"],
+    .violin-fret[data-fret="4"] {
+      background: #e3f2fd; /* Finger 2 - Light Blue */
+    }
+
+    .violin-fret[data-fret="5"],
+    .violin-fret[data-fret="6"] {
+      background: #ffffff; /* Finger 3 - White */
+    }
+
+    .violin-fret[data-fret="7"] {
+      background: #e3f2fd; /* Finger 4 - Light Blue */
+    }
+
+    /* Bass fretboard - all frets white (no finger position colors) */
+    #bassFretboard .violin-fret {
+      background: #ffffff !important;
+    }
+
+    /* Guitar fretboard - all frets white (no finger position colors) */
+    #guitarFretboard .violin-fret {
+      background: #ffffff !important;
+    }
+
+    .violin-note-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 2px solid #333;
+      background: white;
+      color: #333;
+      position: relative;
+      z-index: 1;
+    }
+
+    .violin-note-circle:hover {
+      transform: scale(1.1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Chord highlighting - overlay colored circles */
+    .violin-note-circle.chord-root {
+      background: #4CAF50 !important;
+      border-color: #2E7D32 !important;
+      color: white !important;
+      z-index: 10;
+      box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.3);
+    }
+
+    .violin-note-circle.chord-third {
+      background: #2196F3 !important;
+      border-color: #1565C0 !important;
+      color: white !important;
+      z-index: 10;
+      box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.3);
+    }
+
+    .violin-note-circle.chord-fifth {
+      background: #FF9800 !important;
+      border-color: #E65100 !important;
+      color: white !important;
+      z-index: 10;
+      box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.3);
+    }
+
+    .violin-note-circle.chord-seventh {
+      background: #9C27B0 !important;
+      border-color: #6A1B9A !important;
+      color: white !important;
+      z-index: 10;
+      box-shadow: 0 0 0 3px rgba(156, 39, 176, 0.3);
+    }
+
+    .violin-note-circle.chord-ninth {
+      background: #E91E63 !important;
+      border-color: #AD1457 !important;
+      color: white !important;
+      z-index: 10;
+      box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎹 Chord Practice</h1>
+    
+    <div class="piano-section">
+      <div class="piano-container">
+        <div class="chord-menu" id="chordMenu">
+          <button class="chord-option minor" data-variant="m">m</button>
+          <button class="chord-option diminished" data-variant="º">º</button>
+          <button class="chord-option augmented" data-variant="aug">aug</button>
+        </div>
+        
+        <div class="keys-wrapper">
+          <div class="white-key" data-note="C">
+            <span class="note-name">C</span>
+            <div class="indicator"></div>
+          </div>
+          <div class="white-key" data-note="D">
+            <span class="note-name">D</span>
+            <div class="indicator"></div>
+          </div>
+          <div class="white-key" data-note="E">
+            <span class="note-name">E</span>
+            <div class="indicator"></div>
+          </div>
+          <div class="white-key" data-note="F">
+            <span class="note-name">F</span>
+            <div class="indicator"></div>
+          </div>
+          <div class="white-key" data-note="G">
+            <span class="note-name">G</span>
+            <div class="indicator"></div>
+          </div>
+          <div class="white-key" data-note="A">
+            <span class="note-name">A</span>
+            <div class="indicator"></div>
+          </div>
+          <div class="white-key" data-note="B">
+            <span class="note-name">B</span>
+            <div class="indicator"></div>
+          </div>
+        </div>
+        
+        <div class="black-keys">
+          <div class="black-key" data-note="C#/Db" style="left: 42px;">
+            <span class="note-name">C#/Db</span>
+            <div class="indicator"></div>
+          </div>
+          <div class="black-key" data-note="D#/Eb" style="left: 104px;">
+            <span class="note-name">D#/Eb</span>
+            <div class="indicator"></div>
+          </div>
+          <div class="black-key" data-note="F#/Gb" style="left: 228px;">
+            <span class="note-name">F#/Gb</span>
+            <div class="indicator"></div>
+          </div>
+          <div class="black-key" data-note="G#/Ab" style="left: 290px;">
+            <span class="note-name">G#/Ab</span>
+            <div class="indicator"></div>
+          </div>
+          <div class="black-key" data-note="A#/Bb" style="left: 352px;">
+            <span class="note-name">A#/Bb</span>
+            <div class="indicator"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="config-wrapper">
+        <button class="config-button" id="configBtn">⚙️</button>
+        
+        <div class="config-panel" id="configPanel">
+          <h3>Chord Groups</h3>
+          <div class="chord-groups">
+            <button class="chord-group-btn" data-group="major">Major</button>
+            <button class="chord-group-btn" data-group="minor">Minor</button>
+            <button class="chord-group-btn" data-group="diminished">Diminished</button>
+            <button class="chord-group-btn" data-group="augmented">Augmented</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="selected-notes">
+      <h2>Selected Notes</h2>
+      <div class="notes-display" id="notesDisplay">
+        <div class="empty-message">Hover over piano keys and select chord variants</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="control-btn" id="orderBtn" title="Order Naturally">→</button>
+      <button class="control-btn" id="randomBtn" title="Randomize Order">⤨</button>
+      <button class="control-btn" id="clearBtn" title="Clear All">🗑️</button>
+    </div>
+
+    <div class="playback-controls">
+      <button class="play-btn" id="playBtn" title="Play/Pause">▶️</button>
+      
+      <div class="metronome-controls">
+        <button class="metro-btn" id="decreaseBtn" title="Decrease BPM">-5</button>
+        <div class="bpm-display" id="bpmDisplay">60 BPM</div>
+        <button class="metro-btn" id="increaseBtn" title="Increase BPM">+5</button>
+      </div>
+    </div>
+
+    <div class="chord-notes-section">
+      <div class="chord-notes-tabs">
+        <button class="chord-notes-tab active" data-instrument="piano">Piano</button>
+        <button class="chord-notes-tab" data-instrument="guitar">Guitar</button>
+        <button class="chord-notes-tab" data-instrument="bass">Bass</button>
+        <button class="chord-notes-tab" data-instrument="violin">Violin</button>
+      </div>
+
+      <div class="chord-notes-content active" id="pianoContent">
+        <div class="chord-notes-controls" id="pianoControls">
+          <div class="chord-note-toggle disabled">
+            <div class="chord-notes-label-color root"></div>
+            <span>Root</span>
+          </div>
+          <div class="chord-note-toggle disabled">
+            <div class="chord-notes-label-color third"></div>
+            <span>3rd</span>
+          </div>
+          <div class="chord-note-toggle disabled">
+            <div class="chord-notes-label-color fifth"></div>
+            <span>5th</span>
+          </div>
+          <div class="chord-note-toggle" data-note="seventh" id="pianoSeventhToggle">
+            <div class="chord-notes-label-color seventh"></div>
+            <span>7th</span>
+          </div>
+          <div class="chord-note-toggle" data-note="ninth" id="pianoNinthToggle">
+            <div class="chord-notes-label-color ninth"></div>
+            <span>9th</span>
+          </div>
+        </div>
+        <div class="chord-notes-piano-container" id="chordNotesPiano">
+          <!-- Will be generated by JavaScript -->
+        </div>
+      </div>
+
+      <div class="chord-notes-content" id="guitarContent">
+        <div class="chord-notes-controls" id="guitarControls">
+          <div class="chord-note-toggle disabled">
+            <div class="chord-notes-label-color root"></div>
+            <span>Root</span>
+          </div>
+          <div class="chord-note-toggle disabled">
+            <div class="chord-notes-label-color third"></div>
+            <span>3rd</span>
+          </div>
+          <div class="chord-note-toggle disabled">
+            <div class="chord-notes-label-color fifth"></div>
+            <span>5th</span>
+          </div>
+          <div class="chord-note-toggle" data-note="seventh" id="guitarSeventhToggle">
+            <div class="chord-notes-label-color seventh"></div>
+            <span>7th</span>
+          </div>
+          <div class="chord-note-toggle" data-note="ninth" id="guitarNinthToggle">
+            <div class="chord-notes-label-color ninth"></div>
+            <span>9th</span>
+          </div>
+        </div>
+        <div class="violin-fretboard" id="guitarFretboard">
+          <!-- Will be generated by JavaScript -->
+        </div>
+      </div>
+
+      <div class="chord-notes-content" id="bassContent">
+        <div class="chord-notes-controls" id="bassControls">
+          <div class="chord-note-toggle disabled">
+            <div class="chord-notes-label-color root"></div>
+            <span>Root</span>
+          </div>
+          <div class="chord-note-toggle disabled">
+            <div class="chord-notes-label-color third"></div>
+            <span>3rd</span>
+          </div>
+          <div class="chord-note-toggle disabled">
+            <div class="chord-notes-label-color fifth"></div>
+            <span>5th</span>
+          </div>
+          <div class="chord-note-toggle" data-note="seventh" id="bassSeventhToggle">
+            <div class="chord-notes-label-color seventh"></div>
+            <span>7th</span>
+          </div>
+          <div class="chord-note-toggle" data-note="ninth" id="bassNinthToggle">
+            <div class="chord-notes-label-color ninth"></div>
+            <span>9th</span>
+          </div>
+        </div>
+        <div class="violin-fretboard" id="bassFretboard">
+          <!-- Will be generated by JavaScript -->
+        </div>
+      </div>
+
+      <div class="chord-notes-content" id="violinContent">
+        <div class="chord-notes-controls" id="violinControls">
+          <div class="chord-note-toggle disabled">
+            <div class="chord-notes-label-color root"></div>
+            <span>Root</span>
+          </div>
+          <div class="chord-note-toggle disabled">
+            <div class="chord-notes-label-color third"></div>
+            <span>3rd</span>
+          </div>
+          <div class="chord-note-toggle disabled">
+            <div class="chord-notes-label-color fifth"></div>
+            <span>5th</span>
+          </div>
+          <div class="chord-note-toggle" data-note="seventh" id="violinSeventhToggle">
+            <div class="chord-notes-label-color seventh"></div>
+            <span>7th</span>
+          </div>
+          <div class="chord-note-toggle" data-note="ninth" id="violinNinthToggle">
+            <div class="chord-notes-label-color ninth"></div>
+            <span>9th</span>
+          </div>
+        </div>
+        <div class="violin-fretboard" id="violinFretboard">
+          <!-- Will be generated by JavaScript -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const selectedNotes = new Set();
+    const notesDisplay = document.getElementById('notesDisplay');
+    const allKeys = document.querySelectorAll('.white-key, .black-key');
+    const orderBtn = document.getElementById('orderBtn');
+    const randomBtn = document.getElementById('randomBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const playBtn = document.getElementById('playBtn');
+    const decreaseBtn = document.getElementById('decreaseBtn');
+    const increaseBtn = document.getElementById('increaseBtn');
+    const bpmDisplay = document.getElementById('bpmDisplay');
+    const chordMenu = document.getElementById('chordMenu');
+    const chordOptions = document.querySelectorAll('.chord-option');
+    const configBtn = document.getElementById('configBtn');
+    const configPanel = document.getElementById('configPanel');
+    const chordGroupBtns = document.querySelectorAll('.chord-group-btn');
+    const chordNotesTabs = document.querySelectorAll('.chord-notes-tab');
+    const chordNotesPiano = document.getElementById('chordNotesPiano');
+    const allChordNotesKeys = [];
+
+    // Per-instrument extension toggle states
+    const instrumentExtensions = {
+      piano: { seventh: false, ninth: false },
+      guitar: { seventh: false, ninth: false },
+      bass: { seventh: false, ninth: false },
+      violin: { seventh: false, ninth: false }
+    };
+
+    let isNaturalOrder = true;
+    let isPlaying = false;
+    let currentBPM = 60;
+    let currentNoteIndex = 0;
+    let playInterval = null;
+    let displayedNotes = [];
+    let currentHoveredKey = null;
+    
+    // Audio context for metronome tick sound
+    let audioContext = null;
+    
+    function initAudioContext() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+    
+    function playTickSound() {
+      if (!isPlaying) return;
+      
+      initAudioContext();
+      
+      // Resume audio context if suspended (browser security requirement)
+      if (audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
+      
+      // Create a short, sharp tick sound
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      // Configure the tick sound: short, high-pitched click
+      oscillator.frequency.value = 800; // Frequency in Hz
+      oscillator.type = 'sine';
+      
+      // Quick attack and decay for a sharp tick
+      const now = audioContext.currentTime;
+      gainNode.gain.setValueAtTime(0, now);
+      gainNode.gain.linearRampToValueAtTime(0.3, now + 0.001); // Quick attack
+      gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.05); // Quick decay
+      
+      oscillator.start(now);
+      oscillator.stop(now + 0.05); // Very short duration
+    }
+
+    const allNotes = ['C', 'C#/Db', 'D', 'D#/Eb', 'E', 'F', 'F#/Gb', 'G', 'G#/Ab', 'A', 'A#/Bb', 'B'];
+    const noteOrder = ['C', 'C#/Db', 'D', 'D#/Eb', 'E', 'F', 'F#/Gb', 'G', 'G#/Ab', 'A', 'A#/Bb', 'B'];
+    
+    // White keys only (natural notes)
+    const whiteNotes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+    
+    // Extended white notes for 2 octaves + 1 extra C (15 notes)
+    const extendedWhiteNotes = [...whiteNotes, ...whiteNotes, 'C'];
+    
+    // Black key positions for 2 octaves + 1 extra C#/Db (11 keys)
+    // White keys are 50px wide, black keys are 35px wide
+    // First octave: C=0, D=50, E=100, F=150, G=200, A=250, B=300
+    // Second octave: C=350, D=400, E=450, F=500, G=550, A=600, B=650
+    // Extra C: C=700, C#/Db=735
+    const blackKeyPositions = [
+      { note: 'C#/Db', octave: 0, left: 35 },   // Between C(0) and D(50)
+      { note: 'D#/Eb', octave: 0, left: 87 },   // Between D(50) and E(100)
+      { note: 'F#/Gb', octave: 0, left: 191 },  // Between F(150) and G(200)
+      { note: 'G#/Ab', octave: 0, left: 243 },  // Between G(200) and A(250)
+      { note: 'A#/Bb', octave: 0, left: 295 },  // Between A(250) and B(300)
+      { note: 'C#/Db', octave: 1, left: 385 },  // Between C(350) and D(400)
+      { note: 'D#/Eb', octave: 1, left: 437 },  // Between D(400) and E(450)
+      { note: 'F#/Gb', octave: 1, left: 541 },  // Between F(500) and G(550)
+      { note: 'G#/Ab', octave: 1, left: 593 },  // Between G(550) and A(600)
+      { note: 'A#/Bb', octave: 1, left: 645 },  // Between A(600) and B(650)
+      { note: 'C#/Db', octave: 2, left: 735 }   // Between C(700) and (would be D(750))
+    ];
+    
+    // Initialize chord notes piano
+    function initChordNotesPiano() {
+      chordNotesPiano.innerHTML = '';
+      allChordNotesKeys.length = 0; // Clear the array
+      
+      // Create white keys wrapper
+      const whiteKeysWrapper = document.createElement('div');
+      whiteKeysWrapper.className = 'keys-wrapper';
+      
+      // Create white keys for 2 octaves + 1 extra C (only natural notes)
+      extendedWhiteNotes.forEach((note, index) => {
+        const whiteKey = document.createElement('div');
+        whiteKey.className = 'white-key';
+        whiteKey.setAttribute('data-note', note);
+        whiteKey.setAttribute('data-index', index);
+        
+        const noteName = document.createElement('span');
+        noteName.className = 'note-name';
+        noteName.textContent = note;
+        
+        const indicator = document.createElement('div');
+        indicator.className = 'indicator';
+        
+        whiteKey.appendChild(noteName);
+        whiteKey.appendChild(indicator);
+        whiteKeysWrapper.appendChild(whiteKey);
+        
+        allChordNotesKeys.push(whiteKey);
+      });
+      
+      chordNotesPiano.appendChild(whiteKeysWrapper);
+      
+      // Create black keys wrapper
+      const blackKeysWrapper = document.createElement('div');
+      blackKeysWrapper.className = 'black-keys';
+      
+      blackKeyPositions.forEach(({ note, left }) => {
+        const blackKey = document.createElement('div');
+        blackKey.className = 'black-key';
+        blackKey.setAttribute('data-note', note);
+        blackKey.style.left = left + 'px';
+        
+        const noteName = document.createElement('span');
+        noteName.className = 'note-name';
+        noteName.textContent = note;
+        
+        const indicator = document.createElement('div');
+        indicator.className = 'indicator';
+        
+        blackKey.appendChild(noteName);
+        blackKey.appendChild(indicator);
+        blackKeysWrapper.appendChild(blackKey);
+        
+        allChordNotesKeys.push(blackKey);
+      });
+      
+      chordNotesPiano.appendChild(blackKeysWrapper);
+    }
+    
+    // Get currently active instrument tab
+    function getActiveInstrument() {
+      const activeTab = document.querySelector('.chord-notes-tab.active');
+      return activeTab ? activeTab.getAttribute('data-instrument') : 'piano';
+    }
+    
+    // Tab switching
+    chordNotesTabs.forEach(tab => {
+      tab.addEventListener('click', function() {
+        const instrument = this.getAttribute('data-instrument');
+        
+        // Update tabs
+        chordNotesTabs.forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        
+        // Update content
+        document.querySelectorAll('.chord-notes-content').forEach(c => c.classList.remove('active'));
+        document.getElementById(instrument + 'Content').classList.add('active');
+        
+        // If playing and switching to piano, violin, bass, or guitar, update the display
+        if (isPlaying && (instrument === 'piano' || instrument === 'violin' || instrument === 'bass' || instrument === 'guitar')) {
+          highlightCurrentNote();
+        } else if (!isPlaying && displayedNotes.length > 0) {
+          if (instrument === 'violin') {
+            highlightViolinPositions(displayedNotes[0]);
+          } else if (instrument === 'bass') {
+            highlightBassPositions(displayedNotes[0]);
+          } else if (instrument === 'guitar') {
+            highlightGuitarPositions(displayedNotes[0]);
+          } else if (instrument === 'piano') {
+            highlightChordNotes(displayedNotes[0]);
+          }
+        }
+      });
+    });
+    
+    // Parse chord to get root, 3rd, 5th, 7th, and 9th with absolute positions (0-25)
+    function parseChord(chordName) {
+      // Remove chord variants (m, º, aug)
+      const baseNote = chordName.replace(/m|º|aug/g, '');
+      const variant = chordName.includes('m') ? 'minor' : 
+                     chordName.includes('º') ? 'diminished' : 
+                     chordName.includes('aug') ? 'augmented' : 'major';
+      
+      const rootIndex = noteOrder.indexOf(baseNote);
+      if (rootIndex === -1) return null;
+      
+      // Calculate absolute semitone positions (0-25, not wrapping)
+      let rootPosition = rootIndex; // First octave: 0-11
+      let thirdPosition, fifthPosition, seventhPosition, ninthPosition;
+      
+      if (variant === 'major') {
+        thirdPosition = rootPosition + 4; // Major 3rd (4 semitones)
+        fifthPosition = rootPosition + 7; // Perfect 5th (7 semitones)
+        seventhPosition = rootPosition + 11; // Major 7th (11 semitones)
+        ninthPosition = rootPosition + 14; // Major 9th (14 semitones)
+      } else if (variant === 'minor') {
+        thirdPosition = rootPosition + 3; // Minor 3rd (3 semitones)
+        fifthPosition = rootPosition + 7; // Perfect 5th (7 semitones)
+        seventhPosition = rootPosition + 10; // Minor 7th (10 semitones)
+        ninthPosition = rootPosition + 14; // Major 9th (14 semitones)
+      } else if (variant === 'diminished') {
+        thirdPosition = rootPosition + 3; // Minor 3rd (3 semitones)
+        fifthPosition = rootPosition + 6; // Diminished 5th (6 semitones)
+        seventhPosition = rootPosition + 9; // Diminished 7th (9 semitones)
+        ninthPosition = rootPosition + 13; // Minor 9th (13 semitones)
+      } else if (variant === 'augmented') {
+        thirdPosition = rootPosition + 4; // Major 3rd (4 semitones)
+        fifthPosition = rootPosition + 8; // Augmented 5th (8 semitones)
+        seventhPosition = rootPosition + 11; // Major 7th (11 semitones)
+        ninthPosition = rootPosition + 14; // Major 9th (14 semitones)
+      }
+      
+      // Map positions to note names (wrapping only within 0-25 range for 2 octaves + C)
+      const getNoteAtPosition = (pos) => {
+        if (pos < 0 || pos >= 26) return null;
+        return noteOrder[pos % 12];
+      };
+      
+      return {
+        root: getNoteAtPosition(rootPosition),
+        rootPosition: rootPosition,
+        third: getNoteAtPosition(thirdPosition),
+        thirdPosition: thirdPosition,
+        fifth: getNoteAtPosition(fifthPosition),
+        fifthPosition: fifthPosition,
+        seventh: getNoteAtPosition(seventhPosition),
+        seventhPosition: seventhPosition,
+        ninth: getNoteAtPosition(ninthPosition),
+        ninthPosition: ninthPosition
+      };
+    }
+    
+    // Map semitone position (0-25) to key index in allChordNotesKeys
+    function getKeyAtSemitonePosition(position) {
+      if (position < 0 || position >= 26) return null;
+      
+      const noteName = noteOrder[position % 12];
+      const octave = Math.floor(position / 12);
+      
+      // Check if it's a natural note (white key) or sharp/flat (black key)
+      const isWhiteKey = !noteName.includes('#') && !noteName.includes('b') && !noteName.includes('/');
+      
+      if (isWhiteKey) {
+        // White keys are stored first in allChordNotesKeys (indices 0-14)
+        // White keys: C(0), D(1), E(2), F(3), G(4), A(5), B(6), C(7), D(8), E(9), F(10), G(11), A(12), B(13), C(14)
+        if (octave === 2 && noteName === 'C') {
+          // Special case: extra C at the end
+          return 14; // Index 14 (after 2 full octaves)
+        }
+        const whiteKeyIndex = octave * 7 + whiteNotes.indexOf(noteName);
+        return whiteKeyIndex;
+      } else {
+        // Black keys are stored after white keys (indices 15-25)
+        // Black keys order: C#/Db(0), D#/Eb(0), F#/Gb(0), G#/Ab(0), A#/Bb(0), C#/Db(1), D#/Eb(1), F#/Gb(1), G#/Ab(1), A#/Bb(1), C#/Db(2)
+        const blackKeysInOctave = ['C#/Db', 'D#/Eb', 'F#/Gb', 'G#/Ab', 'A#/Bb'];
+        const blackKeyIndexInOctave = blackKeysInOctave.indexOf(noteName);
+        if (blackKeyIndexInOctave === -1) return null;
+        
+        // Special case: extra C#/Db at octave 2
+        if (octave === 2 && noteName === 'C#/Db') {
+          return extendedWhiteNotes.length + (octave * 5) + blackKeyIndexInOctave; // Index 25
+        }
+        
+        // Black keys start at index 15 (after 15 white keys)
+        return extendedWhiteNotes.length + (octave * 5) + blackKeyIndexInOctave;
+      }
+    }
+    
+    // Highlight chord notes on extended piano at specific semitone positions
+    function highlightChordNotes(chordName) {
+      // Check if piano is initialized
+      if (allChordNotesKeys.length === 0) {
+        console.warn('Chord notes piano not initialized');
+        return;
+      }
+      
+      // Clear all highlights
+      allChordNotesKeys.forEach(key => {
+        key.classList.remove('chord-root', 'chord-third', 'chord-fifth', 'chord-seventh', 'chord-ninth');
+      });
+      
+      if (!chordName) return;
+      
+      const chordData = parseChord(chordName);
+      if (!chordData) return;
+      
+      const activeInstrument = getActiveInstrument();
+      const extensions = instrumentExtensions[activeInstrument] || { seventh: false, ninth: false };
+      
+      // Always highlight root, 3rd, and 5th
+      const rootKeyIndex = getKeyAtSemitonePosition(chordData.rootPosition);
+      const thirdKeyIndex = getKeyAtSemitonePosition(chordData.thirdPosition);
+      const fifthKeyIndex = getKeyAtSemitonePosition(chordData.fifthPosition);
+      
+      if (rootKeyIndex !== null && rootKeyIndex < allChordNotesKeys.length && allChordNotesKeys[rootKeyIndex]) {
+        allChordNotesKeys[rootKeyIndex].classList.add('chord-root');
+      }
+      if (thirdKeyIndex !== null && thirdKeyIndex < allChordNotesKeys.length && allChordNotesKeys[thirdKeyIndex]) {
+        allChordNotesKeys[thirdKeyIndex].classList.add('chord-third');
+      }
+      if (fifthKeyIndex !== null && fifthKeyIndex < allChordNotesKeys.length && allChordNotesKeys[fifthKeyIndex]) {
+        allChordNotesKeys[fifthKeyIndex].classList.add('chord-fifth');
+      }
+      
+      // Conditionally highlight 7th and 9th based on toggle state
+      if (extensions && extensions.seventh) {
+        const seventhKeyIndex = getKeyAtSemitonePosition(chordData.seventhPosition);
+        if (seventhKeyIndex !== null && seventhKeyIndex < allChordNotesKeys.length && allChordNotesKeys[seventhKeyIndex]) {
+          allChordNotesKeys[seventhKeyIndex].classList.add('chord-seventh');
+        }
+      }
+      
+      if (extensions && extensions.ninth) {
+        const ninthKeyIndex = getKeyAtSemitonePosition(chordData.ninthPosition);
+        if (ninthKeyIndex !== null && ninthKeyIndex < allChordNotesKeys.length && allChordNotesKeys[ninthKeyIndex]) {
+          allChordNotesKeys[ninthKeyIndex].classList.add('chord-ninth');
+        }
+      }
+    }
+    
+    // Get the currently displayed chord (either from playing state or clicked note box)
+    function getCurrentDisplayedChord() {
+      if (isPlaying && displayedNotes.length > currentNoteIndex) {
+        return displayedNotes[currentNoteIndex];
+      } else if (!isPlaying && displayedNotes.length > 0) {
+        // Find the note box with 'playing' class (clicked by user)
+        const noteBoxes = notesDisplay.querySelectorAll('.note-box');
+        for (let i = 0; i < noteBoxes.length; i++) {
+          if (noteBoxes[i].classList.contains('playing')) {
+            return displayedNotes[i];
+          }
+        }
+        // If no note box is clicked, default to first one
+        return displayedNotes[0];
+      }
+      return null;
+    }
+    
+    // Initialize extension toggles
+    function initExtensionToggles() {
+      const pianoSeventhToggle = document.getElementById('pianoSeventhToggle');
+      const pianoNinthToggle = document.getElementById('pianoNinthToggle');
+      
+      if (pianoSeventhToggle) {
+        pianoSeventhToggle.addEventListener('click', function() {
+          instrumentExtensions.piano.seventh = !instrumentExtensions.piano.seventh;
+          this.classList.toggle('active', instrumentExtensions.piano.seventh);
+          if (getActiveInstrument() === 'piano') {
+            const currentChord = getCurrentDisplayedChord();
+            if (currentChord) {
+              if (isPlaying) {
+                highlightCurrentNote();
+              } else {
+                highlightChordNotes(currentChord);
+              }
+            }
+          }
+        });
+      }
+      
+      if (pianoNinthToggle) {
+        pianoNinthToggle.addEventListener('click', function() {
+          instrumentExtensions.piano.ninth = !instrumentExtensions.piano.ninth;
+          this.classList.toggle('active', instrumentExtensions.piano.ninth);
+          if (getActiveInstrument() === 'piano') {
+            const currentChord = getCurrentDisplayedChord();
+            if (currentChord) {
+              if (isPlaying) {
+                highlightCurrentNote();
+              } else {
+                highlightChordNotes(currentChord);
+              }
+            }
+          }
+        });
+      }
+      
+      // Violin toggles
+      const violinSeventhToggle = document.getElementById('violinSeventhToggle');
+      const violinNinthToggle = document.getElementById('violinNinthToggle');
+      
+      if (violinSeventhToggle) {
+        violinSeventhToggle.addEventListener('click', function() {
+          instrumentExtensions.violin.seventh = !instrumentExtensions.violin.seventh;
+          this.classList.toggle('active', instrumentExtensions.violin.seventh);
+          if (getActiveInstrument() === 'violin') {
+            const currentChord = getCurrentDisplayedChord();
+            if (currentChord) {
+              if (isPlaying) {
+                highlightCurrentNote();
+              } else {
+                highlightViolinPositions(currentChord);
+              }
+            }
+          }
+        });
+      }
+      
+      if (violinNinthToggle) {
+        violinNinthToggle.addEventListener('click', function() {
+          instrumentExtensions.violin.ninth = !instrumentExtensions.violin.ninth;
+          this.classList.toggle('active', instrumentExtensions.violin.ninth);
+          if (getActiveInstrument() === 'violin') {
+            const currentChord = getCurrentDisplayedChord();
+            if (currentChord) {
+              if (isPlaying) {
+                highlightCurrentNote();
+              } else {
+                highlightViolinPositions(currentChord);
+              }
+            }
+          }
+        });
+      }
+      
+      // Bass toggles
+      const bassSeventhToggle = document.getElementById('bassSeventhToggle');
+      const bassNinthToggle = document.getElementById('bassNinthToggle');
+      
+      if (bassSeventhToggle) {
+        bassSeventhToggle.addEventListener('click', function() {
+          instrumentExtensions.bass.seventh = !instrumentExtensions.bass.seventh;
+          this.classList.toggle('active', instrumentExtensions.bass.seventh);
+          if (getActiveInstrument() === 'bass') {
+            const currentChord = getCurrentDisplayedChord();
+            if (currentChord) {
+              if (isPlaying) {
+                highlightCurrentNote();
+              } else {
+                highlightBassPositions(currentChord);
+              }
+            }
+          }
+        });
+      }
+      
+      if (bassNinthToggle) {
+        bassNinthToggle.addEventListener('click', function() {
+          instrumentExtensions.bass.ninth = !instrumentExtensions.bass.ninth;
+          this.classList.toggle('active', instrumentExtensions.bass.ninth);
+          if (getActiveInstrument() === 'bass') {
+            const currentChord = getCurrentDisplayedChord();
+            if (currentChord) {
+              if (isPlaying) {
+                highlightCurrentNote();
+              } else {
+                highlightBassPositions(currentChord);
+              }
+            }
+          }
+        });
+      }
+      
+      // Guitar toggles
+      const guitarSeventhToggle = document.getElementById('guitarSeventhToggle');
+      const guitarNinthToggle = document.getElementById('guitarNinthToggle');
+      
+      if (guitarSeventhToggle) {
+        guitarSeventhToggle.addEventListener('click', function() {
+          instrumentExtensions.guitar.seventh = !instrumentExtensions.guitar.seventh;
+          this.classList.toggle('active', instrumentExtensions.guitar.seventh);
+          if (getActiveInstrument() === 'guitar') {
+            const currentChord = getCurrentDisplayedChord();
+            if (currentChord) {
+              if (isPlaying) {
+                highlightCurrentNote();
+              } else {
+                highlightGuitarPositions(currentChord);
+              }
+            }
+          }
+        });
+      }
+      
+      if (guitarNinthToggle) {
+        guitarNinthToggle.addEventListener('click', function() {
+          instrumentExtensions.guitar.ninth = !instrumentExtensions.guitar.ninth;
+          this.classList.toggle('active', instrumentExtensions.guitar.ninth);
+          if (getActiveInstrument() === 'guitar') {
+            const currentChord = getCurrentDisplayedChord();
+            if (currentChord) {
+              if (isPlaying) {
+                highlightCurrentNote();
+              } else {
+                highlightGuitarPositions(currentChord);
+              }
+            }
+          }
+        });
+      }
+    }
+    
+    // Violin string tunings (from lowest to highest)
+    // Open string semitone positions in our 0-25 range:
+    // G3 = G in first octave = position 7
+    // D4 = D in second octave = position 2 + 12 = 14
+    // A4 = A in second octave = position 9 + 12 = 21
+    // E5 = E in third octave = position 4 + 24 = 28, but we only go to 25, so use position 4 (E in third octave, wrapped)
+    const violinStrings = [
+      { name: 'E', openNote: 'E', openSemitone: 16 },   // E5 (using position 16 as approximation since 28 > 25)
+      { name: 'A', openNote: 'A', openSemitone: 21 },  // A4
+      { name: 'D', openNote: 'D', openSemitone: 14 },  // D4
+      { name: 'G', openNote: 'G', openSemitone: 7 }   // G3
+    ];
+    
+    const violinFretboard = document.getElementById('violinFretboard');
+    const violinPositions = []; // Store position elements for highlighting
+    
+    // Bass string tunings (from lowest to highest: E, A, D, G)
+    // Standard bass tuning: E1, A1, D2, G2
+    // Open string semitone positions in our 0-25 range:
+    // E1 = E in first octave = position 4
+    // A1 = A in first octave = position 9
+    // D2 = D in second octave = position 2 + 12 = 14
+    // G2 = G in second octave = position 7 + 12 = 19
+    const bassStrings = [
+      { name: 'E', openNote: 'E', openSemitone: 4 },   // E1
+      { name: 'A', openNote: 'A', openSemitone: 9 },   // A1
+      { name: 'D', openNote: 'D', openSemitone: 14 },  // D2
+      { name: 'G', openNote: 'G', openSemitone: 19 }   // G2
+    ];
+    
+    const bassFretboard = document.getElementById('bassFretboard');
+    const bassPositions = []; // Store position elements for highlighting
+    
+    // Guitar string tunings (from lowest to highest: E, A, D, G, B, E)
+    // Standard guitar tuning: E2, A2, D3, G3, B3, E4
+    // Open string semitone positions (wrapped to 0-11 for display):
+    // E2 = E in second octave = position 4
+    // A2 = A in second octave = position 9
+    // D3 = D in third octave = position 2
+    // G3 = G in third octave = position 7
+    // B3 = B in third octave = position 11
+    // E4 = E in fourth octave = position 4 (same note, different octave)
+    const guitarStrings = [
+      { name: 'E', openNote: 'E', openSemitone: 4 },   // E2 (low E)
+      { name: 'A', openNote: 'A', openSemitone: 9 },   // A2
+      { name: 'D', openNote: 'D', openSemitone: 2 },   // D3
+      { name: 'G', openNote: 'G', openSemitone: 7 },   // G3
+      { name: 'B', openNote: 'B', openSemitone: 11 },  // B3
+      { name: 'E', openNote: 'E', openSemitone: 4 }    // E4 (high E)
+    ];
+    
+    const guitarFretboard = document.getElementById('guitarFretboard');
+    const guitarPositions = []; // Store position elements for highlighting
+    
+    // Find which string and position to use for a given note
+    // Limited to 1 octave (0-11) for string instruments
+    function findViolinPosition(targetNote, targetPosition) {
+      // Wrap targetPosition to single octave (0-11)
+      const wrappedPosition = targetPosition % 12;
+      
+      // Try each string to find the best position
+      let bestMatch = null;
+      let bestPosition = Infinity;
+      
+      for (let stringIndex = 0; stringIndex < violinStrings.length; stringIndex++) {
+        const string = violinStrings[stringIndex];
+        // Wrap open semitone to single octave as well
+        const openSemitone = string.openSemitone % 12;
+        
+        // Calculate position on this string
+        let position = wrappedPosition - openSemitone;
+        
+        // Handle negative positions (target is lower than open string)
+        if (position < 0) {
+          // Wrap to positive position within octave
+          position = (position + 12) % 12;
+        }
+        
+        // Ensure position is within 0-11 range
+        position = position % 12;
+        
+        // Prefer positions 0-11 (single octave range)
+        if (position >= 0 && position <= 11 && position < bestPosition) {
+          bestMatch = {
+            stringIndex: stringIndex,
+            stringName: string.name,
+            position: Math.round(position),
+            note: targetNote
+          };
+          bestPosition = position;
+        }
+      }
+      
+      // Fallback: use first string
+      if (!bestMatch) {
+        const fallbackPos = (wrappedPosition - (violinStrings[0].openSemitone % 12) + 12) % 12;
+        bestMatch = {
+          stringIndex: 0,
+          stringName: 'G',
+          position: Math.round(fallbackPos),
+          note: targetNote
+        };
+      }
+      
+      return bestMatch;
+    }
+    
+    // Find ALL positions where a note appears on the violin (across all strings)
+    function findAllViolinPositions(targetNote, targetPosition) {
+      // Wrap targetPosition to single octave (0-11)
+      const wrappedPosition = targetPosition % 12;
+      const allPositions = [];
+      
+      // Check each string
+      for (let stringIndex = 0; stringIndex < violinStrings.length; stringIndex++) {
+        const string = violinStrings[stringIndex];
+        // Wrap open semitone to single octave as well
+        const openSemitone = string.openSemitone % 12;
+        
+        // Calculate position on this string
+        let position = wrappedPosition - openSemitone;
+        
+        // Handle negative positions (target is lower than open string)
+        if (position < 0) {
+          // Wrap to positive position within octave
+          position = (position + 12) % 12;
+        }
+        
+        // Ensure position is within 0-7 range (our fretboard range)
+        position = position % 12;
+        
+        // Only include positions within our displayed range (0-7)
+        if (position >= 0 && position <= 7) {
+          allPositions.push({
+            stringIndex: stringIndex,
+            stringName: string.name,
+            position: Math.round(position),
+            note: targetNote
+          });
+        }
+      }
+      
+      return allPositions;
+    }
+    
+    // Initialize violin fretboard - vertical layout with all notes
+    function initViolinFretboard() {
+      violinFretboard.innerHTML = '';
+      violinPositions.length = 0;
+      
+      // Create string columns (vertical) - reversed order so G is on the left
+      [...violinStrings].reverse().forEach((string, reversedIndex) => {
+        // Calculate original string index (for proper ID and data attributes)
+        const stringIndex = violinStrings.length - 1 - reversedIndex;
+        
+        const stringColumn = document.createElement('div');
+        stringColumn.className = 'violin-string-column';
+        stringColumn.id = `violin-string-column-${stringIndex}`;
+        
+        const stringName = document.createElement('div');
+        stringName.className = 'violin-string-name';
+        stringName.textContent = string.name;
+        stringColumn.appendChild(stringName);
+        
+        const fretsContainer = document.createElement('div');
+        fretsContainer.className = 'violin-frets-container';
+        fretsContainer.id = `violin-frets-${stringIndex}`;
+        
+        // Create frets (0-7) with note circles
+        for (let fret = 0; fret <= 7; fret++) {
+          const fretDiv = document.createElement('div');
+          fretDiv.className = 'violin-fret';
+          fretDiv.setAttribute('data-fret', fret);
+          fretDiv.setAttribute('data-string-index', stringIndex);
+          
+          // Calculate the note at this fret position
+          const openSemitone = string.openSemitone % 12;
+          const noteSemitone = (openSemitone + fret) % 12;
+          const noteName = noteOrder[noteSemitone];
+          
+          // Create white circle for this note
+          const noteCircle = document.createElement('div');
+          noteCircle.className = 'violin-note-circle';
+          noteCircle.setAttribute('data-note', noteName);
+          noteCircle.setAttribute('data-fret', fret);
+          noteCircle.setAttribute('data-string-index', stringIndex);
+          
+          // Display note name with "/" separator
+          let noteDisplay = noteName;
+          // Format enharmonic equivalents: F#/Gb -> F#/b, C#/Db -> C#/b, etc.
+          if (noteName.includes('/')) {
+            const parts = noteName.split('/');
+            const sharpPart = parts[0]; // e.g., "F#"
+            noteDisplay = `${sharpPart}/b`; // e.g., "F#/b"
+          }
+          noteCircle.textContent = noteDisplay;
+          noteCircle.title = `${noteName} on ${string.name} string, fret ${fret}`;
+          
+          fretDiv.appendChild(noteCircle);
+          fretsContainer.appendChild(fretDiv);
+        }
+        
+        stringColumn.appendChild(fretsContainer);
+        violinFretboard.appendChild(stringColumn);
+      });
+    }
+    
+    // Initialize bass fretboard - vertical layout with all notes
+    function initBassFretboard() {
+      bassFretboard.innerHTML = '';
+      bassPositions.length = 0;
+      
+      // Create string columns (vertical) - E, A, D, G order (lowest to highest, left to right)
+      bassStrings.forEach((string, stringIndex) => {
+        const stringColumn = document.createElement('div');
+        stringColumn.className = 'violin-string-column'; // Reuse violin styles
+        stringColumn.id = `bass-string-column-${stringIndex}`;
+        
+        const stringName = document.createElement('div');
+        stringName.className = 'violin-string-name';
+        stringName.textContent = string.name;
+        stringColumn.appendChild(stringName);
+        
+        const fretsContainer = document.createElement('div');
+        fretsContainer.className = 'violin-frets-container';
+        fretsContainer.id = `bass-frets-${stringIndex}`;
+        
+        // Create frets (0-12) with note circles (13 frets total)
+        for (let fret = 0; fret <= 12; fret++) {
+          const fretDiv = document.createElement('div');
+          fretDiv.className = 'violin-fret';
+          fretDiv.setAttribute('data-fret', fret);
+          fretDiv.setAttribute('data-string-index', stringIndex);
+          
+          // Calculate the note at this fret position
+          const openSemitone = string.openSemitone % 12;
+          const noteSemitone = (openSemitone + fret) % 12;
+          const noteName = noteOrder[noteSemitone];
+          
+          // Create white circle for this note
+          const noteCircle = document.createElement('div');
+          noteCircle.className = 'violin-note-circle';
+          noteCircle.setAttribute('data-note', noteName);
+          noteCircle.setAttribute('data-fret', fret);
+          noteCircle.setAttribute('data-string-index', stringIndex);
+          
+          // Display note name with "/" separator
+          let noteDisplay = noteName;
+          // Format enharmonic equivalents: F#/Gb -> F#/b, C#/Db -> C#/b, etc.
+          if (noteName.includes('/')) {
+            const parts = noteName.split('/');
+            const sharpPart = parts[0]; // e.g., "F#"
+            noteDisplay = `${sharpPart}/b`; // e.g., "F#/b"
+          }
+          noteCircle.textContent = noteDisplay;
+          noteCircle.title = `${noteName} on ${string.name} string, fret ${fret}`;
+          
+          fretDiv.appendChild(noteCircle);
+          fretsContainer.appendChild(fretDiv);
+        }
+        
+        stringColumn.appendChild(fretsContainer);
+        bassFretboard.appendChild(stringColumn);
+      });
+    }
+    
+    // Highlight bass positions for a chord
+    function highlightBassPositions(chordName) {
+      // Clear all chord highlighting from existing circles
+      const allNoteCircles = bassFretboard.querySelectorAll('.violin-note-circle');
+      allNoteCircles.forEach(circle => {
+        circle.classList.remove('chord-root', 'chord-third', 'chord-fifth', 'chord-seventh', 'chord-ninth');
+      });
+      
+      if (!chordName) return;
+      
+      const chordData = parseChord(chordName);
+      if (!chordData) return;
+      
+      const activeInstrument = getActiveInstrument();
+      const extensions = instrumentExtensions[activeInstrument] || { seventh: false, ninth: false };
+      
+      // Always show root, 3rd, and 5th
+      const notesToShow = [
+        { position: chordData.rootPosition, note: chordData.root, type: 'chord-root' },
+        { position: chordData.thirdPosition, note: chordData.third, type: 'chord-third' },
+        { position: chordData.fifthPosition, note: chordData.fifth, type: 'chord-fifth' }
+      ];
+      
+      // Add 7th and 9th if toggled
+      if (extensions.seventh) {
+        notesToShow.push({ position: chordData.seventhPosition, note: chordData.seventh, type: 'chord-seventh' });
+      }
+      if (extensions.ninth) {
+        notesToShow.push({ position: chordData.ninthPosition, note: chordData.ninth, type: 'chord-ninth' });
+      }
+      
+      // Find and highlight ALL existing note circles for each note
+      notesToShow.forEach(({ position, note, type }) => {
+        if (position === null || position === undefined || !note) return;
+        
+        // Find all note circles that match this note name across all strings
+        // The note names from parseChord match the noteOrder format, so direct comparison works
+        const allNoteCircles = bassFretboard.querySelectorAll('.violin-note-circle');
+        
+        allNoteCircles.forEach(circle => {
+          const circleNote = circle.getAttribute('data-note');
+          // Direct match (handles enharmonic equivalents like "C#/Db")
+          if (circleNote === note) {
+            // Add chord type class to highlight
+            circle.classList.add(type);
+          }
+        });
+      });
+    }
+    
+    // Initialize guitar fretboard - vertical layout with all notes
+    function initGuitarFretboard() {
+      guitarFretboard.innerHTML = '';
+      guitarPositions.length = 0;
+      
+      // Create string columns (vertical) - E, A, D, G, B, E order (lowest to highest, left to right)
+      guitarStrings.forEach((string, stringIndex) => {
+        const stringColumn = document.createElement('div');
+        stringColumn.className = 'violin-string-column'; // Reuse violin styles
+        stringColumn.id = `guitar-string-column-${stringIndex}`;
+        
+        const stringName = document.createElement('div');
+        stringName.className = 'violin-string-name';
+        stringName.textContent = string.name;
+        stringColumn.appendChild(stringName);
+        
+        const fretsContainer = document.createElement('div');
+        fretsContainer.className = 'violin-frets-container';
+        fretsContainer.id = `guitar-frets-${stringIndex}`;
+        
+        // Create frets (0-12) with note circles (13 frets total)
+        for (let fret = 0; fret <= 12; fret++) {
+          const fretDiv = document.createElement('div');
+          fretDiv.className = 'violin-fret';
+          fretDiv.setAttribute('data-fret', fret);
+          fretDiv.setAttribute('data-string-index', stringIndex);
+          
+          // Calculate the note at this fret position
+          const openSemitone = string.openSemitone % 12;
+          const noteSemitone = (openSemitone + fret) % 12;
+          const noteName = noteOrder[noteSemitone];
+          
+          // Create white circle for this note
+          const noteCircle = document.createElement('div');
+          noteCircle.className = 'violin-note-circle';
+          noteCircle.setAttribute('data-note', noteName);
+          noteCircle.setAttribute('data-fret', fret);
+          noteCircle.setAttribute('data-string-index', stringIndex);
+          
+          // Display note name with "/" separator
+          let noteDisplay = noteName;
+          // Format enharmonic equivalents: F#/Gb -> F#/b, C#/Db -> C#/b, etc.
+          if (noteName.includes('/')) {
+            const parts = noteName.split('/');
+            const sharpPart = parts[0]; // e.g., "F#"
+            noteDisplay = `${sharpPart}/b`; // e.g., "F#/b"
+          }
+          noteCircle.textContent = noteDisplay;
+          noteCircle.title = `${noteName} on ${string.name} string, fret ${fret}`;
+          
+          fretDiv.appendChild(noteCircle);
+          fretsContainer.appendChild(fretDiv);
+        }
+        
+        stringColumn.appendChild(fretsContainer);
+        guitarFretboard.appendChild(stringColumn);
+      });
+    }
+    
+    // Highlight guitar positions for a chord
+    function highlightGuitarPositions(chordName) {
+      // Clear all chord highlighting from existing circles
+      const allNoteCircles = guitarFretboard.querySelectorAll('.violin-note-circle');
+      allNoteCircles.forEach(circle => {
+        circle.classList.remove('chord-root', 'chord-third', 'chord-fifth', 'chord-seventh', 'chord-ninth');
+      });
+      
+      if (!chordName) return;
+      
+      const chordData = parseChord(chordName);
+      if (!chordData) return;
+      
+      const activeInstrument = getActiveInstrument();
+      const extensions = instrumentExtensions[activeInstrument] || { seventh: false, ninth: false };
+      
+      // Always show root, 3rd, and 5th
+      const notesToShow = [
+        { position: chordData.rootPosition, note: chordData.root, type: 'chord-root' },
+        { position: chordData.thirdPosition, note: chordData.third, type: 'chord-third' },
+        { position: chordData.fifthPosition, note: chordData.fifth, type: 'chord-fifth' }
+      ];
+      
+      // Add 7th and 9th if toggled
+      if (extensions.seventh) {
+        notesToShow.push({ position: chordData.seventhPosition, note: chordData.seventh, type: 'chord-seventh' });
+      }
+      if (extensions.ninth) {
+        notesToShow.push({ position: chordData.ninthPosition, note: chordData.ninth, type: 'chord-ninth' });
+      }
+      
+      // Find and highlight ALL existing note circles for each note
+      notesToShow.forEach(({ position, note, type }) => {
+        if (position === null || position === undefined || !note) return;
+        
+        // Find all note circles that match this note name across all strings
+        // The note names from parseChord match the noteOrder format, so direct comparison works
+        const allNoteCircles = guitarFretboard.querySelectorAll('.violin-note-circle');
+        
+        allNoteCircles.forEach(circle => {
+          const circleNote = circle.getAttribute('data-note');
+          // Direct match (handles enharmonic equivalents like "C#/Db")
+          if (circleNote === note) {
+            // Add chord type class to highlight
+            circle.classList.add(type);
+          }
+        });
+      });
+    }
+    
+    // Highlight violin positions for a chord
+    function highlightViolinPositions(chordName) {
+      // Clear all chord highlighting from existing circles
+      const allNoteCircles = violinFretboard.querySelectorAll('.violin-note-circle');
+      allNoteCircles.forEach(circle => {
+        circle.classList.remove('chord-root', 'chord-third', 'chord-fifth', 'chord-seventh', 'chord-ninth');
+      });
+      
+      if (!chordName) return;
+      
+      const chordData = parseChord(chordName);
+      if (!chordData) return;
+      
+      const activeInstrument = getActiveInstrument();
+      const extensions = instrumentExtensions[activeInstrument] || { seventh: false, ninth: false };
+      
+      // Always show root, 3rd, and 5th
+      const notesToShow = [
+        { position: chordData.rootPosition, note: chordData.root, type: 'chord-root' },
+        { position: chordData.thirdPosition, note: chordData.third, type: 'chord-third' },
+        { position: chordData.fifthPosition, note: chordData.fifth, type: 'chord-fifth' }
+      ];
+      
+      // Add 7th and 9th if toggled
+      if (extensions.seventh) {
+        notesToShow.push({ position: chordData.seventhPosition, note: chordData.seventh, type: 'chord-seventh' });
+      }
+      if (extensions.ninth) {
+        notesToShow.push({ position: chordData.ninthPosition, note: chordData.ninth, type: 'chord-ninth' });
+      }
+      
+      // Find and highlight ALL existing note circles for each note
+      notesToShow.forEach(({ position, note, type }) => {
+        if (position === null || position === undefined || !note) return;
+        
+        // Find all note circles that match this note name across all strings
+        // The note names from parseChord match the noteOrder format, so direct comparison works
+        const allNoteCircles = violinFretboard.querySelectorAll('.violin-note-circle');
+        
+        allNoteCircles.forEach(circle => {
+          const circleNote = circle.getAttribute('data-note');
+          // Direct match (handles enharmonic equivalents like "C#/Db")
+          if (circleNote === note) {
+            // Add chord type class to highlight
+            circle.classList.add(type);
+          }
+        });
+      });
+    }
+    
+    // Initialize piano on load
+    initChordNotesPiano();
+    initViolinFretboard();
+    initBassFretboard();
+    initGuitarFretboard();
+    initExtensionToggles();
+
+    // Config button toggle
+    configBtn.addEventListener('click', function() {
+      configPanel.classList.toggle('visible');
+      configBtn.classList.toggle('active');
+    });
+
+    // Chord group buttons
+    chordGroupBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        const group = this.getAttribute('data-group');
+        toggleChordGroup(group);
+      });
+    });
+
+    function toggleChordGroup(group) {
+      let suffix = '';
+      switch(group) {
+        case 'major': suffix = ''; break;
+        case 'minor': suffix = 'm'; break;
+        case 'diminished': suffix = 'º'; break;
+        case 'augmented': suffix = 'aug'; break;
+      }
+
+      const groupChords = allNotes.map(note => note + suffix);
+      const allPresent = groupChords.every(chord => selectedNotes.has(chord));
+
+      if (allPresent) {
+        groupChords.forEach(chord => selectedNotes.delete(chord));
+      } else {
+        groupChords.forEach(chord => selectedNotes.add(chord));
+      }
+
+      allKeys.forEach(key => updateKeySelection(key));
+      updateChordGroupButtons();
+      
+      if (isPlaying) {
+        stopPlayback();
+        updateDisplay();
+        startPlayback();
+      } else {
+        updateDisplay();
+      }
+    }
+
+    function updateChordGroupButtons() {
+      chordGroupBtns.forEach(btn => {
+        const group = btn.getAttribute('data-group');
+        let suffix = '';
+        switch(group) {
+          case 'major': suffix = ''; break;
+          case 'minor': suffix = 'm'; break;
+          case 'diminished': suffix = 'º'; break;
+          case 'augmented': suffix = 'aug'; break;
+        }
+        
+        const groupChords = allNotes.map(note => note + suffix);
+        const allPresent = groupChords.every(chord => selectedNotes.has(chord));
+        
+        if (allPresent) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+    }
+
+    allKeys.forEach(key => {
+      key.addEventListener('mouseenter', function(e) {
+        currentHoveredKey = this;
+        showChordMenu(this);
+      });
+
+      key.addEventListener('click', function(e) {
+        const note = this.getAttribute('data-note');
+        
+        if (selectedNotes.has(note)) {
+          selectedNotes.delete(note);
+        } else {
+          selectedNotes.add(note);
+        }
+        
+        updateKeySelection(this);
+        updateChordGroupButtons();
+        
+        if (isPlaying) {
+          stopPlayback();
+          updateDisplay();
+          startPlayback();
+        } else {
+          updateDisplay();
+        }
+      });
+    });
+
+    chordMenu.addEventListener('mouseenter', function() {
+      this.classList.add('visible');
+    });
+
+    chordMenu.addEventListener('mouseleave', function() {
+      hideChordMenu();
+    });
+
+    chordOptions.forEach(option => {
+      option.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (currentHoveredKey) {
+          const note = currentHoveredKey.getAttribute('data-note');
+          const variant = this.getAttribute('data-variant');
+          const fullNote = note + variant;
+          
+          if (selectedNotes.has(fullNote)) {
+            selectedNotes.delete(fullNote);
+          } else {
+            selectedNotes.add(fullNote);
+          }
+          
+          updateKeySelection(currentHoveredKey);
+          updateChordGroupButtons();
+          
+          if (isPlaying) {
+            stopPlayback();
+            updateDisplay();
+            startPlayback();
+          } else {
+            updateDisplay();
+          }
+        }
+        hideChordMenu();
+      });
+    });
+
+    document.querySelector('.piano-container').addEventListener('mouseleave', function() {
+      hideChordMenu();
+      currentHoveredKey = null;
+    });
+
+    function showChordMenu(key) {
+      const rect = key.getBoundingClientRect();
+      const containerRect = document.querySelector('.piano-container').getBoundingClientRect();
+      
+      chordMenu.classList.add('visible');
+      
+      const left = rect.left - containerRect.left + (rect.width / 2) - (chordMenu.offsetWidth / 2);
+      const top = rect.bottom - containerRect.top - 3;
+      
+      chordMenu.style.left = left + 'px';
+      chordMenu.style.top = top + 'px';
+    }
+
+    function hideChordMenu() {
+      chordMenu.classList.remove('visible');
+    }
+
+    function updateKeySelection(key) {
+      const note = key.getAttribute('data-note');
+      
+      const hasSelectedVariant = Array.from(selectedNotes).some(selectedNote => 
+        selectedNote.startsWith(note)
+      );
+      
+      if (hasSelectedVariant) {
+        key.classList.add('selected');
+      } else {
+        key.classList.remove('selected');
+      }
+    }
+
+    orderBtn.addEventListener('click', function() {
+      isNaturalOrder = true;
+      if (isPlaying) {
+        stopPlayback();
+        updateDisplay();
+        startPlayback();
+      } else {
+        updateDisplay();
+      }
+    });
+
+    randomBtn.addEventListener('click', function() {
+      isNaturalOrder = false;
+      if (isPlaying) {
+        stopPlayback();
+        updateDisplay();
+        startPlayback();
+      } else {
+        updateDisplay();
+      }
+    });
+
+    clearBtn.addEventListener('click', function() {
+      selectedNotes.clear();
+      allKeys.forEach(key => key.classList.remove('selected'));
+      isNaturalOrder = true;
+      updateChordGroupButtons();
+      stopPlayback();
+      updateDisplay();
+    });
+
+    playBtn.addEventListener('click', function() {
+      if (selectedNotes.size === 0) return;
+      
+      if (isPlaying) {
+        stopPlayback();
+      } else {
+        startPlayback();
+      }
+    });
+
+    decreaseBtn.addEventListener('click', function() {
+      if (currentBPM > 5) {
+        currentBPM -= 5;
+        bpmDisplay.textContent = currentBPM + ' BPM';
+        if (isPlaying) {
+          stopPlayback();
+          startPlayback();
+        }
+      }
+    });
+
+    increaseBtn.addEventListener('click', function() {
+      if (currentBPM < 300) {
+        currentBPM += 5;
+        bpmDisplay.textContent = currentBPM + ' BPM';
+        if (isPlaying) {
+          stopPlayback();
+          startPlayback();
+        }
+      }
+    });
+
+    function startPlayback() {
+      if (displayedNotes.length === 0) return;
+      
+      isPlaying = true;
+      playBtn.textContent = '⏸️';
+      playBtn.classList.add('playing');
+      
+      highlightCurrentNote();
+      
+      const interval = (60 / currentBPM) * 1000;
+      playInterval = setInterval(() => {
+        currentNoteIndex = (currentNoteIndex + 1) % displayedNotes.length;
+        highlightCurrentNote();
+      }, interval);
+    }
+
+    function stopPlayback() {
+      isPlaying = false;
+      playBtn.textContent = '▶️';
+      playBtn.classList.remove('playing');
+      
+      if (playInterval) {
+        clearInterval(playInterval);
+        playInterval = null;
+      }
+    }
+
+    function highlightCurrentNote() {
+      const noteBoxes = notesDisplay.querySelectorAll('.note-box');
+      noteBoxes.forEach((box, index) => {
+        if (index === currentNoteIndex) {
+          box.classList.add('playing');
+          // Highlight chord notes based on active instrument tab
+          const activeInstrument = getActiveInstrument();
+          if (displayedNotes.length > currentNoteIndex) {
+            const chordName = displayedNotes[currentNoteIndex];
+            if (activeInstrument === 'piano') {
+              highlightChordNotes(chordName);
+            } else if (activeInstrument === 'violin') {
+              highlightViolinPositions(chordName);
+            } else if (activeInstrument === 'bass') {
+              highlightBassPositions(chordName);
+            } else if (activeInstrument === 'guitar') {
+              highlightGuitarPositions(chordName);
+            }
+          }
+        } else {
+          box.classList.remove('playing');
+        }
+      });
+      
+      // Play tick sound when metronome changes
+      if (isPlaying) {
+        playTickSound();
+      }
+    }
+
+    function updateDisplay() {
+      notesDisplay.innerHTML = '';
+      
+      if (selectedNotes.size === 0) {
+        notesDisplay.innerHTML = '<div class="empty-message">Hover over piano keys and select chord variants</div>';
+        displayedNotes = [];
+        currentNoteIndex = 0;
+        // Clear chord highlights for all instruments
+        highlightChordNotes(null);
+        highlightViolinPositions(null);
+        highlightBassPositions(null);
+        highlightGuitarPositions(null);
+        return;
+      }
+
+      if (isNaturalOrder) {
+        displayedNotes = Array.from(selectedNotes).sort((a, b) => {
+          const noteA = a.replace(/m|º|aug/g, '');
+          const noteB = b.replace(/m|º|aug/g, '');
+          return noteOrder.indexOf(noteA) - noteOrder.indexOf(noteB);
+        });
+      } else {
+        displayedNotes = Array.from(selectedNotes).sort(() => Math.random() - 0.5);
+      }
+
+      displayedNotes.forEach((note, index) => {
+        const noteBox = document.createElement('div');
+        noteBox.className = 'note-box';
+        noteBox.textContent = note;
+        
+        const removeIcon = document.createElement('div');
+        removeIcon.className = 'remove-icon';
+        removeIcon.textContent = '×';
+        removeIcon.addEventListener('click', function(e) {
+          e.stopPropagation();
+          selectedNotes.delete(note);
+          
+          const baseNote = note.replace(/m|º|aug/g, '');
+          const key = Array.from(allKeys).find(k => k.getAttribute('data-note') === baseNote);
+          if (key) {
+            updateKeySelection(key);
+          }
+          
+          updateChordGroupButtons();
+          
+          if (isPlaying) {
+            stopPlayback();
+            updateDisplay();
+            startPlayback();
+          } else {
+            updateDisplay();
+          }
+        });
+        
+        noteBox.appendChild(removeIcon);
+        
+        // Add click handler to highlight chord notes
+        noteBox.addEventListener('click', function(e) {
+          if (e.target.classList.contains('remove-icon')) return;
+          
+          // Highlight this chord based on active instrument tab
+          const activeInstrument = getActiveInstrument();
+          if (activeInstrument === 'piano') {
+            highlightChordNotes(note);
+          } else if (activeInstrument === 'violin') {
+            highlightViolinPositions(note);
+          } else if (activeInstrument === 'bass') {
+            highlightBassPositions(note);
+          } else if (activeInstrument === 'guitar') {
+            highlightGuitarPositions(note);
+          }
+          
+          // Visual feedback
+          const allNoteBoxes = notesDisplay.querySelectorAll('.note-box');
+          allNoteBoxes.forEach(b => b.classList.remove('playing'));
+          this.classList.add('playing');
+        });
+        
+        if (isPlaying && index === currentNoteIndex) {
+          noteBox.classList.add('playing');
+          // Highlight chord notes based on active instrument tab
+          const activeInstrument = getActiveInstrument();
+          if (activeInstrument === 'piano') {
+            highlightChordNotes(note);
+          } else if (activeInstrument === 'violin') {
+            highlightViolinPositions(note);
+          } else if (activeInstrument === 'bass') {
+            highlightBassPositions(note);
+          } else if (activeInstrument === 'guitar') {
+            highlightGuitarPositions(note);
+          }
+        }
+        notesDisplay.appendChild(noteBox);
+      });
+
+      if (currentNoteIndex >= displayedNotes.length) {
+        currentNoteIndex = 0;
+      }
+      
+      // Highlight first note if not playing
+      if (!isPlaying && displayedNotes.length > 0) {
+        const activeInstrument = getActiveInstrument();
+        if (activeInstrument === 'piano') {
+          highlightChordNotes(displayedNotes[0]);
+        } else if (activeInstrument === 'violin') {
+          highlightViolinPositions(displayedNotes[0]);
+        } else if (activeInstrument === 'bass') {
+          highlightBassPositions(displayedNotes[0]);
+        } else if (activeInstrument === 'guitar') {
+          highlightGuitarPositions(displayedNotes[0]);
+        }
+      }
+    }
+  </script>
+</body>
+</html>
